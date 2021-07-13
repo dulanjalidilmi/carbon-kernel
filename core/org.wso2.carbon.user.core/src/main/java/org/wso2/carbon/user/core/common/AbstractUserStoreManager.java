@@ -5493,11 +5493,12 @@ public abstract class AbstractUserStoreManager implements PaginatedUserStoreMana
         boolean isPreUpdateInternalRoleListOfUserSuccess = true;
         boolean isPreUpdateRoleListOfUserSuccess = true;
         String[] deletedInternalRolesArray = new String[0];
+        String[] deletedRolesArrayWithDomain = new String[0];
         String[] addInternalRolesArray = new String[0];
 
         if (CollectionUtils.isNotEmpty(internalRoleDel) || CollectionUtils.isNotEmpty(internalRoleNew)) {
             deletedInternalRolesArray = internalRoleDel.toArray(new String[internalRoleDel.size()]);
-            String[] deletedRolesArrayWithDomain = internalRoleDelWithDomain.toArray(new
+            deletedRolesArrayWithDomain = internalRoleDelWithDomain.toArray(new
                     String[internalRoleDelWithDomain.size()]);
             addInternalRolesArray = internalRoleNew.toArray(new String[internalRoleNew.size()]);
             String[] addRolesArrayWithDomain =
@@ -5570,6 +5571,25 @@ public abstract class AbstractUserStoreManager implements PaginatedUserStoreMana
                             ex.getMessage()), userName, deletedRoles, newRoles);
             throw ex;
         }
+
+        try {
+            for (UserOperationEventListener listener : UMListenerServiceComponent.getUserOperationEventListeners()) {
+                if (!listener.doPostUpdateInternalRoleListOfUser(userName, deletedRolesArrayWithDomain, newRoles, this)) {
+                    handleUpdateRoleListOfUserFailure(
+                            ErrorMessages.ERROR_CODE_ERROR_DURING_POST_UPDATE_ROLE_OF_USER.getCode(),
+                            String.format(ErrorMessages.ERROR_CODE_ERROR_DURING_POST_UPDATE_ROLE_OF_USER.getMessage(),
+                                          UserCoreErrorConstants.POST_LISTENER_TASKS_FAILED_MESSAGE), userName, deletedRoles,
+                            newRoles);
+                    return;
+                }
+            }
+        } catch (UserStoreException ex) {
+            handleUpdateRoleListOfUserFailure(ErrorMessages.ERROR_CODE_ERROR_DURING_POST_UPDATE_ROLE_OF_USER.getCode(),
+                                              String.format(ErrorMessages.ERROR_CODE_ERROR_DURING_POST_UPDATE_ROLE_OF_USER.getMessage(),
+                                                            ex.getMessage()), userName, deletedRoles, newRoles);
+            throw ex;
+        }
+
     }
 
     /**
@@ -13844,7 +13864,6 @@ public abstract class AbstractUserStoreManager implements PaginatedUserStoreMana
         } else if (UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain) || this.isReadOnly()) {
             internalRoleDel.add(UserCoreUtil.removeDomainFromName(deleteRole));
             internalRoleDelWithDomain.add(deleteRole);
-            roleDel.add(deleteRole);
         } else {
             // This is domain free role name.
             roleDel.add(UserCoreUtil.removeDomainFromName(deleteRole));
