@@ -176,6 +176,8 @@ public class UserCoreErrorConstants {
         ERROR_CODE_ERROR_WHILE_UPDATING_ROLE_OF_USER("31402", "Un-expected error while update role of user, %s"),
         ERROR_CODE_ERROR_DURING_POST_UPDATE_ROLE_OF_USER("31403", "Un-expected error during post-step of updating role "
                 + "of user, %s"),
+        ERROR_CODE_ERROR_DURING_POST_UPDATE_INTERNAL_ROLE_OF_USER("31404", "Un-expected error during post-step "
+                + "of updating internal role of user, %s"),
 
         // Error code related with updating role name
         ERROR_CODE_CANNOT_RENAME_ROLE("31501", "The role cannot renamed"),

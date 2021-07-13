@@ -518,6 +518,20 @@ public interface UserOperationEventListener {
             throws UserStoreException;
 
     /**
+     * Define any additional actions after updating internal role list of user.
+     *
+     * @param userName
+     * @param deletedInternalRoles
+     * @param newRoles
+     * @param userStoreManager
+     * @return
+     * @throws UserStoreException
+     */
+    public boolean doPostUpdateInternalRoleListOfUser(String userName, String[] deletedInternalRoles,
+                                                      String[] newRoles, UserStoreManager userStoreManager)
+            throws UserStoreException;
+
+    /**
      * Pre listener for the get user claim value method.
      *
      * @param userName     username.
